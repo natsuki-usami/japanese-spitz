@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Debug-Viewer-Country Header",
+  "version": "1.0.0",
+  "description": "Debug-Viewer-Country リクエストヘッダーを指定ドメインにだけ付与する開発用拡張",
+  "permissions": ["declarativeNetRequest", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": { "default_popup": "popup.html" }
+}

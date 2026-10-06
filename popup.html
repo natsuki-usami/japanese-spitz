@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8" />
+<style>
+  body { width: 280px; font: 13px sans-serif; padding: 12px; }
+  label { display: block; margin: 6px 0; }
+  textarea, input[type="text"] { width: 100%; box-sizing: border-box; }
+  #status { margin-top: 8px; color: #555; }
+</style>
+<strong>Debug-Viewer-Country</strong>
+<label><input type="radio" name="mode" value="off" /> OFF</label>
+<label><input type="radio" name="mode" value="JP" /> JP</label>
+<label><input type="radio" name="mode" value="other" /> JP以外：<input type="text" id="other" value="US" size="4" /></label>
+<label>対象ドメイン（1行1つ）
+  <textarea id="domains" rows="3" placeholder="example.com"></textarea>
+</label>
+<div id="status"></div>
+<script src="popup.js"></script>
