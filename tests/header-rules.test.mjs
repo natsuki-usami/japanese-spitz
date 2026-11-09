@@ -1,8 +1,38 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildRules, DEFAULT_SETTINGS, parseDomains, RULE_ID } from '../header-rules.mjs';
+import { buildRules, DEFAULT_SETTINGS, getProMode, parseDomains, RULE_ID } from '../header-rules.mjs';
 
 const settings = (overrides) => ({ ...DEFAULT_SETTINGS, domains: 'example.com', ...overrides });
+
+test('explicit false is sent on navigations and API requests', () => {
+  const [rule] = buildRules(settings({ proMode: 'false' }));
+  assert.deepEqual(rule.action.requestHeaders, [
+    { header: 'Nikkei-Flags', operation: 'set', value: 'enableProRenewalProPage=false' },
+  ]);
+  assert.ok(rule.condition.resourceTypes.includes('main_frame'));
+  assert.ok(rule.condition.resourceTypes.includes('xmlhttprequest'));
+});
+
+test('true, false, and OFF override the legacy checkbox independently of country', () => {
+  for (const proMode of ['true', 'false', 'off']) {
+    for (const mode of ['off', 'JP', 'other']) {
+      const rules = buildRules(settings({ proMode, mode, proEnabled: true }));
+      const headers = rules[0]?.action.requestHeaders ?? [];
+      const pro = headers.find((h) => h.header === 'Nikkei-Flags');
+      assert.equal(pro?.value, proMode === 'off' ? undefined : `enableProRenewalProPage=${proMode}`);
+      const country = headers.find((h) => h.header === 'Debug-Viewer-Country');
+      assert.equal(country?.value, mode === 'off' ? undefined : mode === 'JP' ? 'JP' : 'US');
+    }
+  }
+});
+
+test('old checkbox settings migrate to true or OFF without sending false', () => {
+  assert.equal(getProMode({ proEnabled: true }), 'true');
+  assert.equal(getProMode({ proEnabled: false }), 'off');
+  assert.equal(getProMode(DEFAULT_SETTINGS), 'off');
+  assert.equal(getProMode({ proMode: 'false', proEnabled: true }), 'false');
+  assert.equal(getProMode({ proMode: 'invalid', proEnabled: true }), 'off');
+});
 
 test('Pro alone adds the exact request header to page navigations and API requests', () => {
   const [rule] = buildRules(settings({ proEnabled: true }));

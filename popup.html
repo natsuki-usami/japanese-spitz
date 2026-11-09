@@ -28,8 +28,10 @@
 </fieldset>
 <fieldset>
   <legend>Proの表示設定</legend>
-  <label><input type="checkbox" id="pro-enabled" disabled /> Pro表示をONにする</label>
-  <p class="hint">ONのときに送信：<br><code>Nikkei-Flags: enableProRenewalProPage=true</code></p>
+  <label><input type="radio" name="pro-mode" value="off" disabled /> OFF（ヘッダーを付与しない）</label>
+  <label><input type="radio" name="pro-mode" value="true" disabled /> true（Pro表示を有効にする）</label>
+  <label><input type="radio" name="pro-mode" value="false" disabled /> false（Pro表示を無効にする）</label>
+  <p class="hint">true / false を選ぶと、その値を<br><code>Nikkei-Flags: enableProRenewalProPage=値</code><br>として送信します。</p>
 </fieldset>
 <fieldset>
   <legend>Debug-Viewer-Country</legend>
