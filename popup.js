@@ -1,4 +1,4 @@
-import { buildRules, DEFAULT_SETTINGS, parseDomains, RULE_ID } from './header-rules.mjs';
+import { buildRules, DEFAULT_SETTINGS, getProMode, parseDomains, RULE_ID } from './header-rules.mjs';
 
 const $ = (id) => document.getElementById(id);
 let saveQueue = Promise.resolve();
@@ -18,7 +18,7 @@ function readSettings() {
     mode: document.querySelector('input[name="mode"]:checked')?.value ?? 'off',
     other: $('other').value.trim().toUpperCase(),
     domains: $('domains').value,
-    proEnabled: $('pro-enabled').checked,
+    proMode: document.querySelector('input[name="pro-mode"]:checked')?.value ?? 'off',
   };
 }
 
@@ -35,7 +35,7 @@ function saveSettings() {
       const rule = addRules[0];
       if (rule) {
         setStatus(`適用中：\n${rule.action.requestHeaders.map(({ header, value }) => `${header}: ${value}`).join('\n')}\n対象：${rule.condition.requestDomains.join(', ')}\nページを再読み込みすると反映されます。`);
-      } else if (settings.proEnabled || settings.mode !== 'off') {
+      } else if (settings.proMode !== 'off' || settings.mode !== 'off') {
         setStatus(settings.domains.trim() ? '有効なヘッダーの値を入力してください。' : '対象サイトを設定してください。まだヘッダーは付与されません。');
       } else {
         setStatus('すべてOFF：ヘッダーは付与しません。');
@@ -68,7 +68,7 @@ async function useCurrentPage() {
 async function reloadCurrentPage() {
   const tab = await getCurrentTab();
   const rules = await saveSettings();
-  if (!rules.length && (readSettings().proEnabled || readSettings().mode !== 'off')) {
+  if (!rules.length && (readSettings().proMode !== 'off' || readSettings().mode !== 'off')) {
     throw new Error('対象サイトとヘッダーの値を設定してください。');
   }
   const domain = parseDomains(tab.url)[0];
@@ -85,7 +85,7 @@ async function initialize() {
   document.querySelector(`input[name="mode"][value="${mode}"]`).checked = true;
   $('other').value = settings.other;
   $('domains').value = settings.domains;
-  $('pro-enabled').checked = settings.proEnabled;
+  document.querySelector(`input[name="pro-mode"][value="${getProMode(settings)}"]`).checked = true;
   document.querySelectorAll('input, textarea').forEach((el) => {
     el.addEventListener('input', () => { saveSettings().catch(showError); });
   });

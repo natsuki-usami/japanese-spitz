@@ -1,5 +1,11 @@
 export const RULE_ID = 1;
-export const DEFAULT_SETTINGS = { mode: 'off', other: 'US', domains: '', proEnabled: false };
+export const DEFAULT_SETTINGS = { mode: 'off', other: 'US', domains: '', proEnabled: false, proMode: null };
+
+export function getProMode(settings) {
+  // Migrate the old checkbox without changing OFF into an explicit false header.
+  if (settings.proMode == null) return settings.proEnabled ? 'true' : 'off';
+  return ['off', 'true', 'false'].includes(settings.proMode) ? settings.proMode : 'off';
+}
 
 export function parseDomains(input) {
   return [...new Set(input.split('\n').map((line) => line.trim()).filter(Boolean).map((line) => {
@@ -28,8 +34,9 @@ export function buildRules(settings) {
     }
     requestHeaders.push({ header: 'Debug-Viewer-Country', operation: 'set', value: country });
   }
-  if (settings.proEnabled) {
-    requestHeaders.push({ header: 'Nikkei-Flags', operation: 'set', value: 'enableProRenewalProPage=true' });
+  const proMode = getProMode(settings);
+  if (proMode !== 'off') {
+    requestHeaders.push({ header: 'Nikkei-Flags', operation: 'set', value: `enableProRenewalProPage=${proMode}` });
   }
   if (!requestHeaders.length) return [];
 
